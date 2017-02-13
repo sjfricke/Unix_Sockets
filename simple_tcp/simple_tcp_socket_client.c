@@ -41,9 +41,6 @@ int main(int argc , char *argv[]) {
   int status;
 
   // allocate messages
-  message = (char*) malloc(sizeof(char) * 8);
-  if (message == NULL) { error("ERROR allocating message"); }  
-
   server_reply = (char*) malloc(sizeof(char) * 512);
   if (server_reply == NULL) { error("ERROR allocating message"); }
   
