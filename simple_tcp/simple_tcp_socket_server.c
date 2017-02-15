@@ -40,7 +40,7 @@ struct message_counter {
 
 int main(int argc, char *argv[]) {
 
-  char* receiveMsg;
+  char receiveMsg[MSG_SIZE];
   char returnMsg[] = "message received";
   int msgSize; // used to store incoming message size
   int status; // used to check status of c functions
@@ -62,8 +62,8 @@ int main(int argc, char *argv[]) {
   socklen_t socksize = sizeof(struct sockaddr_in);
   
   // allocates size for receive message
-  receiveMsg = malloc(sizeof(char) * MSG_SIZE); // max chars for sending data 
-  if (receiveMsg == NULL) { error("ERROR: receiveMsg allocation"); }
+  // receiveMsg = malloc(sizeof(char) * MSG_SIZE); // max chars for sending data 
+  //if (receiveMsg == NULL) { error("ERROR: receiveMsg allocation"); }
 
   memset(&serv, 0, sizeof(serv)); // zero the struct before filling the fields
   serv.sin_family = AF_INET; // set to use Internet address family
@@ -104,18 +104,17 @@ int main(int argc, char *argv[]) {
 
     // a connection has been been received can see the client IP
     printf("Incoming connection from %s \n", inet_ntoa(dest.sin_addr));
-    msgSize = 1;
-    
+    msgSize = 1; // used to start loop
+        
     // main loop to wait for a request
     while(consocket && msgSize > 0) {
 
-      printf("recv %d\tstatus %d\tconsocket %d\n", msgSize, status, consocket);
-      
       // used to get the message of length MSG_SIZE
       msgSize = recv(consocket, receiveMsg, MSG_SIZE , 0);
-      if (msgSize < 0) { error("ERROR on recv"); }
+      if (msgSize < 0) { error("ERROR on recv\n"); }
+      else if (msgSize == 0) { break; } // clients dropped connection from socket
       
-      printf("Client sent the character: %s\n", receiveMsg);
+      printf("Client sent the character: %c\n", receiveMsg[0]);
 
       // adds to message counter if one of the accepted letters
       if (receiveMsg[0] == counter.a) { 
@@ -133,19 +132,19 @@ int main(int argc, char *argv[]) {
 
       //sends back response message
       status = send(consocket, returnMsg, strlen(returnMsg), 0);
-      if (status < 0) {
-	consocket = 0; // ends for loop
-	close(consocket); // ends current TCP connection
-	puts("client dropped connection");
-      }
+      if (status < 0) { error("ERROR on send\n"); }
       
-    } //connection while loop
+    } // end of connection while loop
 
-  } // forever for loop
+    close(consocket); // ends current TCP connection and frees server thread
+    puts("client dropped connection");
+    
+  } // end  forever for loop
 
-  // clean up on close
+  
+  // clean up on close if reached
   printf("\nClosing Socket\n");
   free(receiveMsg);
   close(mySocket);
-  return EXIT_SUCCESS;
+  return 0;
 }
