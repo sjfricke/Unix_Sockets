@@ -5,8 +5,8 @@
  * To compile:
  *     gcc simple_tcp_socket_client.c -o client
  * 
- * To run pass <IP> <PORT> <MESSAGE>
- *     ./client 192.168.1.1 5000 a
+ * To run pass <IP> <PORT>
+ *     ./client 192.168.1.1 5000
  */
 
 #include <stdio.h>
@@ -28,8 +28,8 @@ void error(char *msg) {
 int main(int argc , char *argv[]) {
 
   // first checks arguments
-  if (argc < 4) {
-    error("Need to pass IP, PORT, and message\n./client <IP_of_server> <PORT_on_server> <message>\n");
+  if (argc < 3) {
+    error("Need to pass IP and PORT\n./client <IP_of_server> <PORT_on_server>\n");
   }
 
   int socket_desc;
@@ -37,12 +37,12 @@ int main(int argc , char *argv[]) {
   char* server_reply;
   char* hostIP = argv[1];
   int port = atoi(argv[2]);
-  char* message = argv[3];
+  char message[128]; // sets aside extra space to expand from single char
   int status;
 
-  // allocate messages
+  // allocate space for messages
   server_reply = (char*) malloc(sizeof(char) * 512);
-  if (server_reply == NULL) { error("ERROR allocating message"); }
+  if (server_reply == NULL) { error("ERROR allocating server_reply"); }
   
   // Create socket
   // AF_INET refers to the Internet Domain
@@ -54,28 +54,34 @@ int main(int argc , char *argv[]) {
   server.sin_addr.s_addr = inet_addr(hostIP); // sets IP of server
   server.sin_family = AF_INET; // uses internet address domain
   server.sin_port = htons(port); // sets PORT on server
-
+  
   // Connect to remote server with socket
   status = connect(socket_desc, (struct sockaddr *)&server , sizeof(server));
   if (status < 0) { error("Connection error"); }
 
   puts("Connected\n");
 
-  // sends message of only 1 byte
-  status =  send(socket_desc , message , 1 , 0);
-  if (status < 0) { error("Send failed"); }
+  for (;;) { //runs forever
 
-  puts("Data Sent\n");
+    printf("Enter letter to send: ");
+    scanf("%c", message); // gets user input
+   
+    // sends message of only 1 byte
+    status =  send(socket_desc, message , 1 , 0);
+    if (status < 0) { error("Send failed\n"); }
 
-  //Receive a reply from the server
-  status = recv(socket_desc, server_reply , 512, 0);
-  if (status < 0) {
-    puts("ERROR: Reply failed");
-  } else {
-    puts("Reply received:");
-    puts(server_reply);
-  }
+    printf("Sent Message\n");
+
+    //Receive a reply from the server
+    status = recv(socket_desc, server_reply , 512, 0);
+    if (status < 0) {
+      puts("ERROR: Reply failed\n");
+    } else {
+      printf("Reply received: %s\n\n", server_reply);
+    }
+    
+  }  
 
   close(socket_desc);
-  return EXIT_SUCCESS;
+  return 0;
 }
