@@ -1,10 +1,10 @@
 /*
  * Simple TCP Socket server
  * Author: Spencer Fricke
- * 
+ *
  * To compile:
  *     gcc simple_tcp_socket_server.c -o server
- * 
+ *
  * To run
  *     ./server <optional_port_number>
  */
@@ -36,11 +36,11 @@ struct message_counter {
   char a;
   char b;
   char c;
-} message_counter; 
+} message_counter;
 
 int main(int argc, char *argv[]) {
 
-  char receiveMsg[MSG_SIZE];
+  char receiveMsg[MSG_SIZE]; // message buffer
   char returnMsg[] = "message received";
   int msgSize; // used to store incoming message size
   int status; // used to check status of c functions return values
@@ -50,9 +50,9 @@ int main(int argc, char *argv[]) {
   struct sockaddr_in dest; // socket info about the machine connecting to us
   struct sockaddr_in serv; // socket info about our server
   int mySocket;            // socket used to listen for incoming connections
-  int consocket;           // used to hold status of connect to socket 
+  int consocket;           // used to hold status of connect to socket
   socklen_t socksize = sizeof(struct sockaddr_in);
-  
+
   // see if passed port in argument
   if (argc == 2) {
     port = atoi(argv[1]);
@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
   status = bind(mySocket, (struct sockaddr *)&serv, sizeof(struct sockaddr));
 
   // checks for TIME_WAIT socket
-  // when daemon is closed there is a delay to make sure all TCP data is propagated 
+  // when daemon is closed there is a delay to make sure all TCP data is propagated
   if (status < 0) {
     printf("ERROR opening socket: %d , possible TIME_WAIT\n", status);
     printf("USE: netstat -ant|grep %d to find out\n", port);
@@ -85,14 +85,14 @@ int main(int argc, char *argv[]) {
   } else {
     printf("Socket Binded!\n");
   }
-  
+
   // start listening, allowing a queue of up to 1 pending connection
   listen(mySocket, 1);
   printf("Socket Listening on port %d!\n", port);
 
   // prevents daemon from closing on a closed client
   signal(SIGPIPE, SIG_IGN);
-  
+
   for (;;) { // keeps daemon running forever
 
     // blocks until a TCP handshake is made
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     // a connection has been been received can see the client IP
     printf("Incoming connection from %s \n", inet_ntoa(dest.sin_addr));
     msgSize = 1; // used to start loop
-        
+
     // main loop to wait for a request
     while(consocket && msgSize > 0) {
 
@@ -109,18 +109,18 @@ int main(int argc, char *argv[]) {
       msgSize = recv(consocket, receiveMsg, MSG_SIZE , 0);
       if (msgSize < 0) { error("ERROR on recv\n"); }
       else if (msgSize == 0) { break; } // clients dropped connection from socket
-      
+
       printf("Client sent the character: %c\n", receiveMsg[0]);
 
       // adds to message counter if one of the accepted letters
-      if (receiveMsg[0] == counter.a) { 
+      if (receiveMsg[0] == counter.a) {
 	counter.a_count++;
       } else if (receiveMsg[0] == counter.b) {
 	counter.b_count++;
       } else if (receiveMsg[0] == counter.c) {
 	counter.c_count++;
       }
-	
+
       printf("Current Count\n\tA: %d\n\tB: %d\n\tC: %d\n", counter.a_count, counter.b_count, counter.c_count);
 
       // clears receive message buffer
@@ -129,15 +129,15 @@ int main(int argc, char *argv[]) {
       // sends back response message
       status = send(consocket, returnMsg, strlen(returnMsg), 0);
       if (status < 0) { error("ERROR on send\n"); }
-      
+
     } // end of connection while loop
 
     close(consocket); // ends current TCP connection and frees server thread
     puts("client dropped connection");
-    
+
   } // end forever loop
 
-  
+
   // clean up on close if reached
   printf("\nClosing Socket\n");
   free(receiveMsg);

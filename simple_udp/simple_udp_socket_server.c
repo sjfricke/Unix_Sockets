@@ -39,7 +39,7 @@ struct message_counter {
 
 int main(int argc, char *argv[]) {
 
-  char receiveMsg[MSG_SIZE];
+  char receiveMsg[MSG_SIZE]; // message buffer
   char returnMsg[] = "message received\n";
   int msgSize; // used to store incoming message size
   int status; // used to check status of c functions return values
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
   if (status < 0) { error("ERROR binding socket \n"); }
   else { printf("Socket Binded on port %d\n", port); }
 
-  for (;;) {
+  for (;;) { // keeps daemon running forever
 
     // used to get message of size MSG_SIZE
     msgSize = recvfrom(mySocket, receiveMsg, MSG_SIZE, 0, (struct sockaddr *)&dest, &socksize);
