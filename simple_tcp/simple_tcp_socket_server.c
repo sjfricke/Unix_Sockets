@@ -23,7 +23,7 @@
 #define MSG_SIZE 512
 
 // wrapper for throwing error
-void error(char *msg) {
+void error(const char *msg) {
     perror(msg);
     exit(1);
 }
@@ -43,9 +43,16 @@ int main(int argc, char *argv[]) {
   char receiveMsg[MSG_SIZE];
   char returnMsg[] = "message received";
   int msgSize; // used to store incoming message size
-  int status; // used to check status of c functions
+  int status; // used to check status of c functions return values
   int port;
 
+  struct message_counter counter = {0,0,0,'a','b','c'}; // used to keep track of messages
+  struct sockaddr_in dest; // socket info about the machine connecting to us
+  struct sockaddr_in serv; // socket info about our server
+  int mySocket;            // socket used to listen for incoming connections
+  int consocket;           // used to hold status of connect to socket 
+  socklen_t socksize = sizeof(struct sockaddr_in);
+  
   // see if passed port in argument
   if (argc == 2) {
     port = atoi(argv[1]);
@@ -53,29 +60,18 @@ int main(int argc, char *argv[]) {
     port = DEFAULT_PORT;
   }
 
-  struct message_counter counter = {0,0,0,'a','b','c'}; // used to keep track of messages
-    
-  struct sockaddr_in dest; // socket info about the machine connecting to us
-  struct sockaddr_in serv; // socket info about our server
-  int mySocket;            // socket used to listen for incoming connections
-  int consocket;           // used to hold status of connect to socket 
-  socklen_t socksize = sizeof(struct sockaddr_in);
-  
-  // allocates size for receive message
-  // receiveMsg = malloc(sizeof(char) * MSG_SIZE); // max chars for sending data 
-  //if (receiveMsg == NULL) { error("ERROR: receiveMsg allocation"); }
-
   memset(&serv, 0, sizeof(serv)); // zero the struct before filling the fields
   serv.sin_family = AF_INET; // set to use Internet address family
-  serv.sin_addr.s_addr = htonl(INADDR_ANY); // set our local IP address
-  serv.sin_port = htons(port); // set the server port number
+  serv.sin_addr.s_addr = htonl(INADDR_ANY); // sets our local IP address
+  serv.sin_port = htons(port); // sets the server port number
 
   // creates the socket
   // AF_INET refers to the Internet Domain
   // SOCK_STREAM sets a stream to send data
   // 0 will have the OS pick TCP for SOCK_STREAM
   mySocket = socket(AF_INET, SOCK_STREAM, 0);
-  printf("Socket Created! \n");
+  if (mySocket < 0) { error("ERROR: Opening socket\n"); }
+  else { printf("TCP Socket Created! \n"); }
 
   // bind serv information to mySocket
   status = bind(mySocket, (struct sockaddr *)&serv, sizeof(struct sockaddr));
@@ -127,10 +123,10 @@ int main(int argc, char *argv[]) {
 	
       printf("Current Count\n\tA: %d\n\tB: %d\n\tC: %d\n", counter.a_count, counter.b_count, counter.c_count);
 
-      //clears receive message
-      bzero(receiveMsg, MSG_SIZE);
+      // clears receive message buffer
+      memset(receiveMsg, 0, MSG_SIZE);
 
-      //sends back response message
+      // sends back response message
       status = send(consocket, returnMsg, strlen(returnMsg), 0);
       if (status < 0) { error("ERROR on send\n"); }
       
@@ -139,7 +135,7 @@ int main(int argc, char *argv[]) {
     close(consocket); // ends current TCP connection and frees server thread
     puts("client dropped connection");
     
-  } // end  forever for loop
+  } // end forever loop
 
   
   // clean up on close if reached
