@@ -43,7 +43,7 @@ int main(int argc , char *argv[]) {
   int status;
 
   // allocate space for messages
-  server_reply = (char*) malloc(sizeof(char) * 512);
+  server_reply = (char*) malloc(sizeof(char) * MSG_SIZE);
   if (server_reply == NULL) { error("ERROR allocating server_reply"); }
   
   // Create socket
@@ -51,7 +51,7 @@ int main(int argc , char *argv[]) {
   // SOCK_STREAM sets a stream to send data
   // 0 will have the OS pick TCP for SOCK_STREAM
   socket_desc = socket(AF_INET, SOCK_STREAM, 0);
-  if (socket_desc == -1) { error ("Could not create socket"); }
+  if (socket_desc < 0) { error ("Could not create socket"); }
 
   server.sin_addr.s_addr = inet_addr(hostIP); // sets IP of server
   server.sin_family = AF_INET; // uses internet address domain
