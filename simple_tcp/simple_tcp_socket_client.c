@@ -19,6 +19,8 @@
 #include <sys/socket.h>
 #include <signal.h>
 
+#define MSG_SIZE 512
+
 // wrapper for throwing error
 void error(char *msg) {
     perror(msg);
@@ -37,7 +39,7 @@ int main(int argc , char *argv[]) {
   char* server_reply;
   char* hostIP = argv[1];
   int port = atoi(argv[2]);
-  char message[128]; // sets aside extra space to expand from single char
+  char message[MSG_SIZE]; // sets aside extra space to expand from single char
   int status;
 
   // allocate space for messages
@@ -54,34 +56,34 @@ int main(int argc , char *argv[]) {
   server.sin_addr.s_addr = inet_addr(hostIP); // sets IP of server
   server.sin_family = AF_INET; // uses internet address domain
   server.sin_port = htons(port); // sets PORT on server
-  
+
   // Connect to remote server with socket
   status = connect(socket_desc, (struct sockaddr *)&server , sizeof(server));
   if (status < 0) { error("Connection error"); }
 
   puts("Connected\n");
 
-  for (;;) { //runs forever
+  for (;;) { //runs forever  
 
     printf("Enter letter to send: ");
-    scanf("%c", message); // gets user input
+    scanf("%s", message); // gets user input
    
-    // sends message of only 1 byte
-    status =  send(socket_desc, message , 1 , 0);
+    // sends all data of MSG_SIZE bytes
+    status =  send(socket_desc, message , MSG_SIZE, 0);
     if (status < 0) { error("Send failed\n"); }
 
     printf("Sent Message\n");
 
     //Receive a reply from the server
-    status = recv(socket_desc, server_reply , 512, 0);
+    status = recv(socket_desc, server_reply, MSG_SIZE, 0);
     if (status < 0) {
-      puts("ERROR: Reply failed\n");
+      error("ERROR: Reply failed\n");
     } else {
       printf("Reply received: %s\n\n", server_reply);
     }
-    
-  }  
 
-  close(socket_desc);
+  }
+  
+  close(socket_desc);    
   return 0;
 }
