@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
   signal(SIGPIPE, SIG_IGN);
 
     // blocks until a TCP handshake is made
-  while(consocket = accept(mySocket, (struct sockaddr *)&dest, &socksize)) {
+  while( (consocket = accept(mySocket, (struct sockaddr*)&dest, &socksize)) ) {
 
     // a connection has been been received can see the client IP
     printf("Incoming connection from %s \n", inet_ntoa(dest.sin_addr));
