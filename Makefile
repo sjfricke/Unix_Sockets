@@ -1,23 +1,23 @@
 CC = gcc
 CFLAGS = -Wall -Werror
 
-main: simpleTCP simpleUDP webSocket
+main: TCP UDP MultiCast
 
-simpleTCP:
-	$(CC) simple_tcp/simple_tcp_socket_server.c $(CFLAGS) -o simple_tcp/server
-	$(CC) simple_tcp/simple_tcp_socket_client.c $(CFLAGS) -o simple_tcp/client
+TCP:
+	$(CC) tcp/simple_tcp_socket_server.c $(CFLAGS) -o tcp/server
+	$(CC) tcp/threaded_tcp_server.c $(CFLAGS) -lpthread -o tcp/server_threaded
+	$(CC) tcp/simple_tcp_socket_client.c $(CFLAGS) -o tcp/client
 
-simpleUDP:
-	$(CC) simple_udp/simple_udp_socket_server.c $(CFLAGS) -o simple_udp/server
-	$(CC) simple_udp/simple_udp_socket_client.c $(CFLAGS) -o simple_udp/client
+UDP:
+	$(CC) udp/simple_udp_socket_server.c $(CFLAGS) -o udp/server
+	$(CC) udp/simple_udp_socket_client.c $(CFLAGS) -o udp/client
 
-webSocket:
-	$(CC) web_socket/web_socket_server.c $(CFLAGS) -lpthread -o web_socket/server
+MultiCast:
 
 clean:
-	rm simple_tcp/server
-	rm simple_tcp/client
-	rm simple_udp/server
-	rm simple_udp/client
-	rm web_socket/server
+	rm tcp/server
+	rm tcp/server_threaded
+	rm tcp/client
+	rm udp/server
+	rm udp/client
 
