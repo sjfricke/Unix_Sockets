@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
     memset(receiveMsg, 0, MSG_SIZE);
 
     // sends back message to sender
-    status = sendto(mySocket, returnMsg ,17, 0, (struct sockaddr *)&dest, socksize);
+    status = sendto(mySocket, returnMsg, strlen(returnMsg), 0, (struct sockaddr *)&dest, socksize);
     if (status < 0) { error("ERROR: on send\n"); }
 
   } // end forever loop
