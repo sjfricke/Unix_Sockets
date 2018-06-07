@@ -3,9 +3,9 @@
 * A collection of different sockets written in C
 
 ## Socket Types
-* [Simple TCP Sockets](https://github.com/sjfricke/Unix_Sockets/tree/master/simple_tcp)
+* [Simple TCP Sockets](https://github.com/sjfricke/Unix_Sockets/tree/master/tcp)
   * Both a server and client program to send a TCP message
-* [Simple UDP Sockets](https://github.com/sjfricke/Unix_Sockets/tree/master/simple_udp)
+* [Simple UDP Sockets](https://github.com/sjfricke/Unix_Sockets/tree/master/udp)
   * Both a server and client program to send a UDP message
   
 ## How To Run
